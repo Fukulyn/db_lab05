@@ -20,7 +20,7 @@ async function transferStudent(studentId, oldDeptId, newDeptId) {
       WHERE Student_ID = ? 
         AND Course_ID IN (
           SELECT Course_ID FROM COURSE 
-          WHERE Department_ID = ? AND Is_Required = 1
+          WHERE Department_ID = ? 
         )
     `, [studentId, oldDeptId]);
     
@@ -28,7 +28,7 @@ async function transferStudent(studentId, oldDeptId, newDeptId) {
     const requiredCourses = await conn.query(`
       SELECT Course_ID 
       FROM COURSE 
-      WHERE Department_ID = ? AND Is_Required = 1
+      WHERE Department_ID = ? 
     `, [newDeptId]);
     
     // 假設有個當前學期的 ID
@@ -36,8 +36,8 @@ async function transferStudent(studentId, oldDeptId, newDeptId) {
     
     for (const course of requiredCourses) {
       await conn.query(`
-        INSERT INTO ENROLLMENT (Student_ID, Course_ID, Semester, Status)
-        VALUES (?, ?, ?, '轉系加選')
+        INSERT INTO ENROLLMENT (Student_ID, Course_ID, Semester_ID, Status, Enrollment_Date)
+        VALUES (?, ?, ?, '轉系加選', CURDATE())
       `, [studentId, course.Course_ID, currentSemester]);
     }
     
@@ -52,4 +52,4 @@ async function transferStudent(studentId, oldDeptId, newDeptId) {
 }
 
 // 執行轉系功能（範例）
-transferStudent('S10810005', 'CS001', 'EE001');
+transferStudent('S10811005', 'EE001', 'CS001');
